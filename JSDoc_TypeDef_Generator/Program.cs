@@ -27,14 +27,17 @@ namespace JSDoc_TypeDef_Generator
             }
             string output = "/**\n * [Enter Type Description Here]\n * @typedef {Object} [Enter Type Name Here]\n";
             object JSON = JsonConvert.DeserializeObject(JSONString);
-            if (JSON.GetType().IsArray) {
-
-            }
+            ProcessObject(JSON);
             Console.ReadLine();
         }
         static string ProcessArray(object array) {
         }
         static string ProcessObject(object obj) {
+            if (obj.GetType().IsArray)
+                return ProcessArray(obj);
+        }
+        static string AddProperty(string ExistingTypeDef, string Name, string Type) {
+
         }
     }
 }
