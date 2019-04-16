@@ -1,4 +1,5 @@
 ﻿using Mono.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -24,8 +25,16 @@ namespace JSDoc_TypeDef_Generator
                 return;
 #endif
             }
+            string output = "/**\n * [Enter Type Description Here]\n * @typedef {Object} [Enter Type Name Here]";
+            object JSON = JsonConvert.DeserializeObject(JSONString);
+            if (JSON.GetType().IsArray) {
 
+            }
             Console.ReadLine();
+        }
+        static string ProcessArray(object array) {
+        }
+        static string ProcessObject(object obj) {
         }
     }
 }
