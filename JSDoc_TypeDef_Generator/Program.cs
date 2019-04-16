@@ -25,7 +25,7 @@ namespace JSDoc_TypeDef_Generator
                 return;
 #endif
             }
-            string output = "/**\n * [Enter Type Description Here]\n * @typedef {Object} [Enter Type Name Here]";
+            string output = "/**\n * [Enter Type Description Here]\n * @typedef {Object} [Enter Type Name Here]\n";
             object JSON = JsonConvert.DeserializeObject(JSONString);
             if (JSON.GetType().IsArray) {
 
