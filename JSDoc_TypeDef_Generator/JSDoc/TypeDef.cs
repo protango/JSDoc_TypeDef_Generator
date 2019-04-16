@@ -1,15 +1,19 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace JSDoc_TypeDef_Generator.JSDoc { 
     class TypeDef {
+        private const string defaultDescription = "Enter Description Here";
+        private const string defaultName = "MyType";
+
         public string Name { get; set; }
         public string Description { get; set; }
         public PropertyList Properties { get; set; }
 
-        public TypeDef(string Name, string Description) {
+        public TypeDef(string Name = defaultName, string Description = defaultDescription) {
             this.Name = Name;
             this.Description = Description;
             Properties = new PropertyList();
@@ -24,13 +28,25 @@ namespace JSDoc_TypeDef_Generator.JSDoc {
 
         public static TypeDef[] Parse(string str) {
             List<TypeDef> result = new List<TypeDef>();
-            object JSON = JsonConvert.DeserializeObject(str);
-
             TypeDef parseObj(object obj) {
+                Type t = obj.GetType();
+                if (t.IsArray) { return parseArr((object[])obj); }
+                TypeDef current = new TypeDef(defaultDescription + result.Count);
+                var props = t.GetProperties();
+                foreach (var prop in props) {
+                    if (prop.PropertyType.IsClass)
+                        parseObj(prop.GetValue(obj));
+                    else
+
+                    current.Properties.Add(prop.Name, prop.PropertyType);
+                }
             }
             TypeDef parseArr(object[] arr) {
 
             }
+            object JSON = JsonConvert.DeserializeObject(str);
+            parseObj(JSON);
+            return result.ToArray();
         }
         
     }
