@@ -36,8 +36,17 @@ namespace JSDoc_TypeDef_Generator
             if (obj.GetType().IsArray)
                 return ProcessArray(obj);
         }
-        static string AddProperty(string ExistingTypeDef, string Name, string Type) {
-
+        /// <summary>
+        /// Adds a property to an existing typedef
+        /// </summary>
+        /// <param name="ExistingTypeDef">The existing typedef</param>
+        /// <param name="Name">The name of the property you are trying to add. Cannot contains any spaces</param>
+        /// <param name="Type">The type of the property you aretrying to add.</param>
+        /// <param name="Description"></param>
+        /// <returns>The updated typedef</returns>
+        static string AddProperty(string ExistingTypeDef, string Name, string Type, string Description = "") {
+            if (!ExistingTypeDef.EndsWith("\n")) ExistingTypeDef += "\n";
+            ExistingTypeDef += $" * @property {{{Type}}} {Name} {Description}";
         }
     }
 }
