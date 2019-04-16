@@ -16,6 +16,10 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         public override string ToString() {
             return string.Join('\n', this.Select(x => x.ToString()));
         }
+        public bool Equivalent(PropertyList other)
+        {
+            return this.All(x => other.Any(y=>y.Equivalent(x)));
+        }
     }
     class Property
     {
@@ -29,6 +33,12 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         }
         public override string ToString() {
             return $"@property {{{Type}}} {Name} {Description}";
+        }
+        public bool Equivalent(Property other)
+        {
+            return Name == other.Name &&
+                   Type == other.Type &&
+                   Description == other.Description;
         }
     }
 }

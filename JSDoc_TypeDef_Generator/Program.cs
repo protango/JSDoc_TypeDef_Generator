@@ -25,28 +25,20 @@ namespace JSDoc_TypeDef_Generator
                 return;
 #endif
             }
-            string output = "/**\n * [Enter Type Description Here]\n * @typedef {Object} [Enter Type Name Here]\n";
-            object JSON = JsonConvert.DeserializeObject(JSONString);
+            JSDoc.TypeDef result = new JSDoc.TypeDef("MyType", "Enter Type Description Here");
+            
             ProcessObject(JSON);
             Console.ReadLine();
         }
-        static string ProcessArray(object array) {
+        static Type Process
+        static string ProcessArray(object[] array) {
+
         }
         static string ProcessObject(object obj) {
             if (obj.GetType().IsArray)
-                return ProcessArray(obj);
-        }
-        /// <summary>
-        /// Adds a property to an existing typedef
-        /// </summary>
-        /// <param name="ExistingTypeDef">The existing typedef</param>
-        /// <param name="Name">The name of the property you are trying to add. Cannot contains any spaces</param>
-        /// <param name="Type">The type of the property you aretrying to add.</param>
-        /// <param name="Description"></param>
-        /// <returns>The updated typedef</returns>
-        static string AddProperty(string ExistingTypeDef, string Name, string Type, string Description = "") {
-            if (!ExistingTypeDef.EndsWith("\n")) ExistingTypeDef += "\n";
-            ExistingTypeDef += $" * @property {{{Type}}} {Name} {Description}";
+                return ProcessArray((object[])obj);
+            var type = obj.GetType();
+            var props = type.GetProperties();
         }
     }
 }

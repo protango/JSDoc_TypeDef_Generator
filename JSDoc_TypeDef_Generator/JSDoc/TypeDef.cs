@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,14 +9,13 @@ namespace JSDoc_TypeDef_Generator.JSDoc
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public PropertyList Properties = new PropertyList();
-
-        private Dictionary<string, string> properties = new Dictionary<string, string>();
+        public PropertyList Properties { get; set; }
 
         public TypeDef(string Name, string Description)
         {
             this.Name = Name;
             this.Description = Description;
+            Properties = new PropertyList();
         }
 
         public override string ToString()
@@ -24,6 +24,11 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             string props = Properties.ToString();
             if (props != "") result += "\n" + props;
             return result;
+        }
+
+        public static TypeDef[] Parse(string str) {
+            List<TypeDef> result = new List<TypeDef>();
+            object JSON = JsonConvert.DeserializeObject(str);
         }
     }
 }
