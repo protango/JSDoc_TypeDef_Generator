@@ -41,7 +41,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             this.Types = Types;
         }
 
-        public static JSDType Date { get => new JSDType("date"); }
+        public static JSDType Date { get => new JSDType("Date"); }
         public static JSDType Boolean { get => new JSDType("boolean"); }
         public static JSDType Number { get => new JSDType("number"); }
         public static JSDType String { get => new JSDType("string"); }
