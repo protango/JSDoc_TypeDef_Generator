@@ -33,7 +33,7 @@ namespace JSDoc_TypeDef_Generator
             Console.ReadLine();
         }
         static string Commentify(string s) {
-            return "/**\n * "+s.Replace("\n", " * \n") + "\n */";
+            return "/**\n * "+s.Replace("\n", "\n * ") + "\n */";
         }
     }
 }
