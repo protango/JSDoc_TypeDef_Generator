@@ -41,6 +41,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             this.Types = Types;
         }
 
+        public static JSDType Date { get => new JSDType("date"); }
         public static JSDType Boolean { get => new JSDType("boolean"); }
         public static JSDType Number { get => new JSDType("number"); }
         public static JSDType String { get => new JSDType("string"); }
@@ -55,6 +56,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             if (t.Equals(typeof(decimal))) return Number;
             if (t.Equals(typeof(long))) return Number;
             if (t.Equals(typeof(bool))) return Boolean;
+            if (t.Equals(typeof(DateTime))) return Date;
             return Any;
         }
 
