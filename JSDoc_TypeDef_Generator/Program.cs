@@ -26,7 +26,6 @@ namespace JSDoc_TypeDef_Generator
                         JSONFilePath =f;
                     } },
                     { "o|output=", "Path to a file where output JSDoc will be written. Cannot be used with the --schema option", f => {
-                        if (!File.Exists(f)) throw new OptionException($"File \"{f}\" not found or inaccessible","--output");
                         OutputFilePath = f;
                     } },
                     { "s|schema=", "Path to a file where esiting JSDoc schema will be read from, new types will be appended to this file. Cannot be used with the --output option.", f => {
@@ -62,6 +61,9 @@ namespace JSDoc_TypeDef_Generator
                         }
                     }
                 }
+#if DEBUG
+                Console.ReadLine();
+#endif
             } catch (OptionException e) {
                 Error($"Value for {e.OptionName} was invalid\n{e.Message}");
             } catch (Exception e) {
