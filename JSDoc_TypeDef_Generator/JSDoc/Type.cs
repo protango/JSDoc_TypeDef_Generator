@@ -52,6 +52,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             if (t.Equals(typeof(double))) return Number;
             if (t.Equals(typeof(float))) return Number;
             if (t.Equals(typeof(decimal))) return Number;
+            if (t.Equals(typeof(long))) return Number;
             if (t.Equals(typeof(bool))) return Boolean;
             return Any;
         }
