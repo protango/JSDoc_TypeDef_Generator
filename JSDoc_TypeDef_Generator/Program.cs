@@ -9,6 +9,7 @@ namespace JSDoc_TypeDef_Generator
 {
     class Program
     {
+        private const string EXENAME = "gentypedef";
         static void Main(string[] args)
         {
             string JSONFilePath = null;
@@ -20,11 +21,46 @@ namespace JSDoc_TypeDef_Generator
                     if (!File.Exists(f)) throw new OptionException($"File \"{f}\" not found or inaccessible","--file");
                     JSONFilePath =f;
                 } },
-                { "o|output=", "Path to a file where output JSDoc will be written", f => OutputFilePath = f },
-                { "s|schema:", "Path to a file where esiting JSDoc schema will be read from", f => SchemaFilePath = f },
+                { "o|output=", "Path to a file where output JSDoc will be written. Cannot be used with the --schema option", f => {
+                    if (!File.Exists(f)) throw new OptionException($"File \"{f}\" not found or inaccessible","--output");
+                    OutputFilePath = f;
+                } },
+                { "s|schema=", "Path to a file where esiting JSDoc schema will be read from, new types will be appended to this file. Cannot be used with the --output option.", f => {
+                    if (!File.Exists(f)) throw new OptionException($"File \"{f}\" not found or inaccessible","--schema");
+                    SchemaFilePath = f;
+                } },
                 { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
             };
+            List<string> extra;
+            try {
+                extra = options.Parse(args);
+                if (!shouldShowHelp) {
+                    if (JSONFilePath == null) throw new OptionException("JSON File must be specified", "--file");
+                    if (OutputFilePath == null && SchemaFilePath == null) throw new OptionException("Either an output or schema file must be specified", "--output");
+                    if (OutputFilePath != null && SchemaFilePath != null) throw new OptionException("You cannot specify an output and schema file at the same time", "--output");
+                }
+            } catch (OptionException e) {
+                Console.Write($"{EXENAME}: ");
+                Console.WriteLine(e.Message);
+                Console.WriteLine($"Try '{EXENAME} --help' for more information.");
+#if DEBUG
+                Console.ReadLine();
+#endif
+                return;
+            }
+            if (shouldShowHelp) {
+                Console.WriteLine($"Usage: {EXENAME} -f <Input File> (-o <Output File>|-s <Schema File>)");
+                Console.WriteLine("Generates JSDoc typedefs based on a JSON object");
+                Console.WriteLine("Nested objects are supported, in this case multiple typedefs will be produced");
+                Console.WriteLine();
 
+                Console.WriteLine("Options:");
+                options.WriteOptionDescriptions(Console.Out);
+#if DEBUG
+                Console.ReadLine();
+#endif
+                return;
+            }
 
 
             string JSONString;

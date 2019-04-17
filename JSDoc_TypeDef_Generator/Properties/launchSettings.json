@@ -1,7 +1,8 @@
 {
   "profiles": {
     "JSDoc_TypeDef_Generator": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--help"
     }
   }
 }
