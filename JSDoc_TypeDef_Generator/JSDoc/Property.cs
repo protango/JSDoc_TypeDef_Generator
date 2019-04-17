@@ -7,7 +7,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
 {
     class PropertyList : List<Property>
     {
-        public void Add(string Name, string Type, string Description = "") {
+        public void Add(string Name, JSDType Type, string Description = "") {
             Add(new Property(Name, Type, Description));
         }
         public void Remove(string Name) {
@@ -16,29 +16,35 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         public override string ToString() {
             return string.Join('\n', this.Select(x => x.ToString()));
         }
-        public bool Equivalent(PropertyList other)
-        {
-            return this.All(x => other.Any(y=>y.Equivalent(x)));
-        }
     }
     class Property
     {
         public string Name { get; set; }
-        public string Type { get; set; }
+        public JSDType Type { get; set; }
+        public bool Optional { get; set; }
         public string Description { get; set; }
-        public Property(string Name, string Type, string Description = "") {
+
+        public Property(string Name, JSDType Type, string Description = "") {
             this.Name = Name;
             this.Type = Type;
             this.Description = Description;
         }
         public override string ToString() {
-            return $"@property {{{Type}}} {Name} {Description}";
+            string tName = Name;
+            if (Optional) tName = $"[{Name}]";
+            return $"@property {Type} {tName} {Description}";
         }
-        public bool Equivalent(Property other)
+
+        public override bool Equals(object obj)
         {
+            if (!(obj is Property)) return false;
+            Property other = (Property)obj;
             return Name == other.Name &&
-                   Type == other.Type &&
+                   Type.Equals(other.Type) && 
                    Description == other.Description;
+        }
+        public override int GetHashCode() {
+            return (Name + Type.GetHashCode() + Description).GetHashCode();
         }
     }
 }
