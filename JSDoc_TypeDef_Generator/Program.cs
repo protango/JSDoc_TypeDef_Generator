@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace JSDoc_TypeDef_Generator
 {
@@ -25,20 +26,14 @@ namespace JSDoc_TypeDef_Generator
                 return;
 #endif
             }
-            JSDoc.TypeDef result = new JSDoc.TypeDef("MyType", "Enter Type Description Here");
-            
-            ProcessObject(JSON);
+            JSDoc.TypeDef[] tds = JSDoc.TypeDef.ParseJSON(JSONString);
+            foreach (var td in tds) {
+                Console.WriteLine(Commentify(td.ToString()));
+            }
             Console.ReadLine();
         }
-        static Type Process
-        static string ProcessArray(object[] array) {
-
-        }
-        static string ProcessObject(object obj) {
-            if (obj.GetType().IsArray)
-                return ProcessArray((object[])obj);
-            var type = obj.GetType();
-            var props = type.GetProperties();
+        static string Commentify(string s) {
+            return "/**\n * "+s.Replace("\n", " * \n") + "\n */";
         }
     }
 }

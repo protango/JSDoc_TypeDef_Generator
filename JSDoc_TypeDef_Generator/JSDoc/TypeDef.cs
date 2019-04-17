@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,21 +28,23 @@ namespace JSDoc_TypeDef_Generator.JSDoc {
             return result;
         }
 
-        public static TypeDef[] Parse(string str) {
+        public static TypeDef[] ParseJSON(string str) {
             List<TypeDef> result = new List<TypeDef>();
             JSDType parseObj(object obj) {
-                Type t = obj.GetType();
-                if (t.IsArray) return parseArr((object[])obj);
-                if (!t.IsClass) return JSDType.TranslatePrimitive(t);
+                if (obj is JObject) {
+                    TypeDef current = new TypeDef(defaultName + result.Count);
+                    JObject jobj = (JObject)obj;
+                    var props = jobj.Properties();
+                    foreach (var prop in props) {
+                        JSDType jsdt = parseObj(prop.Value);
+                        current.Properties.Add(prop.Name, jsdt);
+                    }
 
-                TypeDef current = new TypeDef(defaultDescription + result.Count);
-                var props = t.GetProperties();
-                foreach (var prop in props) {
-                    JSDType jsdt = parseObj(prop.GetValue(obj));
-                    current.Properties.Add(prop.Name, jsdt);
-                }
-                
-                return squashTypes(current).JSDType;
+                    return squashTypes(current).JSDType;
+                } else if (obj is JArray)
+                    return parseArr(((JArray)obj).ToArray());
+                else
+                    return JSDType.TranslatePrimitive(obj.GetType());
             }
             JSDType parseArr(object[] arr) {
                 if (arr.Length == 0) return new JSDType() { IsArray = true };
@@ -71,7 +74,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc {
             object JSON = JsonConvert.DeserializeObject(str);
             JSDType rootType = parseObj(JSON);
 
-            TypeDef rootTypeDef = result.First(x => x.JSDType == rootType);
+            TypeDef rootTypeDef = result.First(x => x.JSDType.Equals(rootType));
             result.Remove(rootTypeDef);
             result.Add(rootTypeDef);
             result.Reverse();// move root typedef to the front of list
