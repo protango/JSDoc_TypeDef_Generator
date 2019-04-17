@@ -13,10 +13,9 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         private List<TypeDef> typeDefinitions = new List<TypeDef>();
         public TypeDef[] TypeDefinitions => typeDefinitions.ToArray();
 
-        public static JSDScope ParseJSON(string str) {
-            JToken JSON = (JToken)JsonConvert.DeserializeObject(str);
+        public static JSDScope ParseJSONToken(JToken obj) {
             JSDScope scope = new JSDScope();
-            JSDType rootType = scope.ObjSpec(JSON);
+            JSDType rootType = scope.ObjSpec(obj);
 
             TypeDef rootTypeDef = scope.typeDefinitions.First(x => x.JSDType.Equals(rootType));
             scope.typeDefinitions.Remove(rootTypeDef);
