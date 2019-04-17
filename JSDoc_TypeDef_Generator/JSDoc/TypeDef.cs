@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Pluralize.NET.Core;
 
 namespace JSDoc_TypeDef_Generator.JSDoc { 
     class TypeDef {
@@ -30,41 +31,47 @@ namespace JSDoc_TypeDef_Generator.JSDoc {
 
         public static TypeDef[] ParseJSON(string str) {
             List<TypeDef> result = new List<TypeDef>();
-            JSDType parseObj(JToken obj) {
+            JSDType parseObj(JToken obj, string propName = null) {
                 if (obj is JObject) {
                     TypeDef current = new TypeDef();
                     JObject jobj = (JObject)obj;
                     var props = jobj.Properties();
                     foreach (var prop in props) {
-                        JSDType jsdt = parseObj(prop.Value);
+                        JSDType jsdt = parseObj(prop.Value, prop.Name);
                         current.Properties.Add(prop.Name, jsdt);
                     }
 
-                    return squashTypes(current).JSDType;
+                    return squashTypes(current, propName).JSDType;
                 } else if (obj is JArray)
-                    return parseArr((JArray)obj);
+                    return parseArr((JArray)obj, propName);
                 else if (obj is JValue)
                     return JSDType.TranslatePrimitive(((JValue)obj).Value?.GetType());
                 throw new Exception("obj must be either a JObject, JArray, or JValue");
             }
-            JSDType parseArr(JArray arr) {
+            JSDType parseArr(JArray arr, string propName = null) {
                 if (arr.Count == 0) return new JSDType() { IsArray = true };
                 Type[] ts = arr.Select(x => x.GetType()).ToArray();
                 int classCount = ts.Count(x => x.IsClass);
 
                 List<JSDType> arrTypes = new List<JSDType>();
                 foreach (var elem in arr) {
-                    arrTypes.Add(parseObj(elem));
+                    arrTypes.Add(parseObj(elem, new Pluralizer().Singularize(propName)));
                 }
-                return new JSDType(arrTypes.SelectMany(x => x.Types).Distinct().ToArray());
+                return new JSDType(arrTypes.SelectMany(x => x.Types).Distinct().ToArray()) { IsArray = true };
             }
-            TypeDef squashTypes(TypeDef t) {
+            TypeDef squashTypes(TypeDef t, string propName = null) {
                 foreach (TypeDef td in result) {
                     if (td.Properties.TrySquash(t.Properties)) {
                         return td;
                     }
                 }
-                t.Name = defaultName + result.Count;
+                propName = propName ?? defaultName;
+                if (result.Any(x => x.Name == propName)) { 
+                    int i = 1;
+                    while (result.Any(x => x.Name == propName+"_"+i)) i++;
+                    propName += "_" + i;
+                }
+                t.Name = propName;
                 result.Add(t);
                 return t;
             } 
