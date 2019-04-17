@@ -17,6 +17,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             if (Types.Length > 1) tt = $"({tt})";
             if (Nullable == NullableStatus.NonNullable) tt = "!" + tt;
             else if (Nullable == NullableStatus.Nullable) tt = "?" + tt;
+            if (IsArray) tt += "[]";
             return $"{{{tt}}}";
         }
 
