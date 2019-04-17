@@ -45,22 +45,22 @@ namespace JSDoc_TypeDef_Generator
                 if (OutputFilePath == null && SchemaFilePath == null) throw new OptionException("Either an output or schema file must be specified", "--output");
                 if (OutputFilePath != null && SchemaFilePath != null) throw new OptionException("You cannot specify an output and schema file at the same time", "--output");
 
+                JToken jt;
                 using (StreamReader file = File.OpenText(JSONFilePath)) {
                     using (JsonTextReader jsr = new JsonTextReader(file)) {
                         JsonSerializer serializer = new JsonSerializer();
-                        JToken jt;
                         try {
                             jt = (JToken)serializer.Deserialize(jsr);
                         } catch (JsonException e) {
                             Error("Invalid JSON in input file");
                             return;
                         }
-                        JSDoc.JSDScope scope = JSDoc.JSDScope.ParseJSONToken(jt);
-                        foreach (var td in scope.TypeDefinitions) {
-                            Console.WriteLine(Commentify(td.ToString()));
-                        }
                     }
                 }
+                JSDoc.JSDScope scope = JSDoc.JSDScope.ParseJSONToken(jt);
+                File.WriteAllText(OutputFilePath, scope.ToString().Replace("\n", "\r\n"));
+                Console.WriteLine($"Successfully wrote JSDoc to \"{OutputFilePath}\"");
+                Console.WriteLine($"Root type is \"{scope.TypeDefinitions.First().Name}\"");
 #if DEBUG
                 Console.ReadLine();
 #endif
@@ -92,10 +92,6 @@ namespace JSDoc_TypeDef_Generator
 #if DEBUG
             Console.ReadLine();
 #endif
-        }
-
-        static string Commentify(string s) {
-            return "/**\n * "+s.Replace("\n", "\n * ") + "\n */";
         }
     }
 }

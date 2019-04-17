@@ -25,6 +25,12 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             return scope;
         }
 
+        public override string ToString() {
+            string result = "";
+            foreach (var td in typeDefinitions) result += "/**\n * " + td.ToString().Replace("\n", "\n * ") + "\n */\n";
+            return result;
+        }
+
         private JSDType ObjSpec(JToken obj, string propName = null) {
             if (obj is JObject) {
                 TypeDef current = new TypeDef();
