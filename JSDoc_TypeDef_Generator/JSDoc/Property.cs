@@ -16,6 +16,30 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         public override string ToString() {
             return string.Join('\n', this.Select(x => x.ToString()));
         }
+
+        public bool TrySquash(PropertyList otherpl) {
+            var big = (otherpl.Count > Count ? otherpl : this).ToArray();
+            var small = (otherpl.Count > Count ? this : otherpl).ToArray();
+            bool success = true;
+            foreach (var smallmatch in small) {
+                Property bigmatch = big.FirstOrDefault(x => smallmatch.Name == x.Name);
+                if (bigmatch == null) { success = false; break; }
+                if (!bigmatch.Type.Equals(smallmatch.Type)) {
+                    if (bigmatch.Type.IsAny) {
+                        bigmatch.Type = smallmatch.Type;
+                    } else if (smallmatch.Type.IsAny) {
+                        smallmatch.Type = bigmatch.Type;
+                    } else {
+                        success = false; break;
+                    }
+                }
+            }
+            if (success) {
+                Clear();
+                AddRange(big);
+            }
+            return success;
+        }
     }
     class Property
     {

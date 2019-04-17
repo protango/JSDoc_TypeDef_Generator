@@ -10,6 +10,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         public string[] Types { get; }
         public NullableStatus Nullable { get; set; }
         public bool IsArray { get; set; }
+        public bool IsAny { get => Types.Length == 1 && Types[0] == "any"; }
 
         public override string ToString() {
             string tt = string.Join("|", Types);
@@ -42,9 +43,10 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         public static JSDType Boolean { get => new JSDType("boolean"); }
         public static JSDType Number { get => new JSDType("number"); }
         public static JSDType String { get => new JSDType("string"); }
-        public static JSDType Any { get => new JSDType(); }
+        public static JSDType Any { get => new JSDType("any"); }
 
         public static JSDType TranslatePrimitive(Type t) {
+            if (t == null) return Any;
             if (t.Equals(typeof(string))) return String;
             if (t.Equals(typeof(int))) return Number;
             if (t.Equals(typeof(double))) return Number;
@@ -53,6 +55,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             if (t.Equals(typeof(bool))) return Boolean;
             return Any;
         }
+
 
         public enum NullableStatus {
             Unspecified,

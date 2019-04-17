@@ -30,9 +30,9 @@ namespace JSDoc_TypeDef_Generator.JSDoc {
 
         public static TypeDef[] ParseJSON(string str) {
             List<TypeDef> result = new List<TypeDef>();
-            JSDType parseObj(object obj) {
+            JSDType parseObj(JToken obj) {
                 if (obj is JObject) {
-                    TypeDef current = new TypeDef(defaultName + result.Count);
+                    TypeDef current = new TypeDef();
                     JObject jobj = (JObject)obj;
                     var props = jobj.Properties();
                     foreach (var prop in props) {
@@ -42,12 +42,13 @@ namespace JSDoc_TypeDef_Generator.JSDoc {
 
                     return squashTypes(current).JSDType;
                 } else if (obj is JArray)
-                    return parseArr(((JArray)obj).ToArray());
-                else
-                    return JSDType.TranslatePrimitive(obj.GetType());
+                    return parseArr((JArray)obj);
+                else if (obj is JValue)
+                    return JSDType.TranslatePrimitive(((JValue)obj).Value?.GetType());
+                throw new Exception("obj must be either a JObject, JArray, or JValue");
             }
-            JSDType parseArr(object[] arr) {
-                if (arr.Length == 0) return new JSDType() { IsArray = true };
+            JSDType parseArr(JArray arr) {
+                if (arr.Count == 0) return new JSDType() { IsArray = true };
                 Type[] ts = arr.Select(x => x.GetType()).ToArray();
                 int classCount = ts.Count(x => x.IsClass);
 
@@ -59,19 +60,15 @@ namespace JSDoc_TypeDef_Generator.JSDoc {
             }
             TypeDef squashTypes(TypeDef t) {
                 foreach (TypeDef td in result) {
-                    if (t.Properties.All(x => td.Properties.Contains(x))) {
-                        // equivalent type already exists
-                        return td;
-                    } else if (td.Properties.All(x => t.Properties.Contains(x))) {
-                        // squash this type into existing type
-                        td.Properties = t.Properties;
+                    if (td.Properties.TrySquash(t.Properties)) {
                         return td;
                     }
                 }
+                t.Name = defaultName + result.Count;
                 result.Add(t);
                 return t;
             } 
-            object JSON = JsonConvert.DeserializeObject(str);
+            JToken JSON = (JToken)JsonConvert.DeserializeObject(str);
             JSDType rootType = parseObj(JSON);
 
             TypeDef rootTypeDef = result.First(x => x.JSDType.Equals(rootType));
