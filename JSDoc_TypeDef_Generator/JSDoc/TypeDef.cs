@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Pluralize.NET.Core;
+using Pluralize.NET;
 
 namespace JSDoc_TypeDef_Generator.JSDoc { 
     class TypeDef {
