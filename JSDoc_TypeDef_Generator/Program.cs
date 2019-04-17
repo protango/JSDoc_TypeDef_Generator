@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Mono.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace JSDoc_TypeDef_Generator
@@ -9,6 +11,22 @@ namespace JSDoc_TypeDef_Generator
     {
         static void Main(string[] args)
         {
+            string JSONFilePath = null;
+            string OutputFilePath = null;
+            string SchemaFilePath = null;
+            bool shouldShowHelp = false;
+            var options = new OptionSet {
+                { "f|file=", "Path to a file containing a JSON object", f => {
+                    if (!File.Exists(f)) throw new OptionException($"File \"{f}\" not found or inaccessible","--file");
+                    JSONFilePath =f;
+                } },
+                { "o|output=", "Path to a file where output JSDoc will be written", f => OutputFilePath = f },
+                { "s|schema:", "Path to a file where esiting JSDoc schema will be read from", f => SchemaFilePath = f },
+                { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
+            };
+
+
+
             string JSONString;
             if (args.Length == 1)
             {
@@ -21,15 +39,19 @@ namespace JSDoc_TypeDef_Generator
                 if (JSONString == "") JSONString = "{\"Code\":\"Mon1\",\"FileID\":26,\"ID\":56,\"Name\":\"Monday 1\",\"Number\":1,\"Periods\":[{\"Code\":\"TG\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":false,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":386,\"Index\":0,\"Load\":0.2,\"Name\":\"Tutor AM\",\"Number\":1,\"Quadruples\":false,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":false,\"Day\":null},{\"Code\":\"1\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":false,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":387,\"Index\":0,\"Load\":1,\"Name\":\"Period 1\",\"Number\":2,\"Quadruples\":false,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":false,\"Day\":null},{\"Code\":\"2\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":true,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":388,\"Index\":0,\"Load\":1,\"Name\":\"Period 2\",\"Number\":3,\"Quadruples\":false,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":false,\"Day\":null},{\"Code\":\"3\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":true,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":389,\"Index\":0,\"Load\":1,\"Name\":\"Period 3\",\"Number\":4,\"Quadruples\":false,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":true,\"Day\":null},{\"Code\":\"4\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":false,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":390,\"Index\":0,\"Load\":1,\"Name\":\"Period 4\",\"Number\":5,\"Quadruples\":false,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":false,\"Day\":null},{\"Code\":\"5\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":true,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":391,\"Index\":0,\"Load\":1,\"Name\":\"Period 5\",\"Number\":6,\"Quadruples\":false,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":false,\"Day\":null},{\"Code\":\"6\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":false,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":392,\"Index\":0,\"Load\":1,\"Name\":\"Period 6\",\"Number\":7,\"Quadruples\":false,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":false,\"Day\":null},{\"Code\":\"7\",\"DayID\":56,\"DayNumber\":1,\"Doubles\":true,\"EndTime\":\"00:00:00\",\"FileID\":26,\"ID\":393,\"Index\":0,\"Load\":1,\"Name\":\"Period 7\",\"Number\":8,\"Quadruples\":true,\"SiteMove\":false,\"StartTime\":\"00:00:00\",\"Triples\":false,\"Day\":null}]}";
 #else
                 Console.Error.WriteLine("This utility generates a JSDOC TypeDef comment based on a JSON object");
-                Console.Error.WriteLine("Usage: gentypedef <JSON Object>");
+                Console.Error.WriteLine("Usage: gentypedef <JSON_File_Path>");
                 return;
 #endif
             }
-            JSDoc.TypeDef[] tds = JSDoc.TypeDef.ParseJSON(JSONString);
-            foreach (var td in tds) {
-                Console.WriteLine(Commentify(td.ToString()));
+            JSDoc.TypeDef[] tds;
+            try {
+                tds = JSDoc.JSDScope.ParseJSON(JSONString).TypeDefinitions;
+                foreach (var td in tds) {
+                    Console.WriteLine(Commentify(td.ToString()));
+                }
+            } catch (JsonReaderException) {
+                Console.Error.WriteLine("Invalid JSON");
             }
-            Console.ReadLine();
         }
         static string Commentify(string s) {
             return "/**\n * "+s.Replace("\n", "\n * ") + "\n */";
