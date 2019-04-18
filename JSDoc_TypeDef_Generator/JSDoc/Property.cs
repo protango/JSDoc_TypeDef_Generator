@@ -17,7 +17,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             return string.Join('\n', this.Select(x => x.ToString()));
         }
 
-        public bool TrySquash(PropertyList otherpl) {
+        public bool TrySquash(PropertyList otherpl, int maxMultiType = int.MaxValue) {
             var big = (otherpl.Count > Count ? otherpl : this).ToArray();
             var small = (otherpl.Count > Count ? this : otherpl).ToArray();
             bool success = true;
@@ -25,12 +25,12 @@ namespace JSDoc_TypeDef_Generator.JSDoc
                 Property bigmatch = big.FirstOrDefault(x => smallmatch.Name == x.Name);
                 if (bigmatch == null) { success = false; break; }
                 if (!bigmatch.Type.Equals(smallmatch.Type)) {
-                    if (bigmatch.Type.IsAny) {
-                        bigmatch.Type = smallmatch.Type;
-                    } else if (smallmatch.Type.IsAny) {
-                        smallmatch.Type = bigmatch.Type;
+                    JSDType bmt = bigmatch.Type, smt = smallmatch.Type;
+                    if (JSDType.TryMerge(bmt, smt, out JSDType merged) && merged.Types.Length < maxMultiType) { 
+                        bigmatch.Type = merged;
                     } else {
-                        success = false; break;
+                        success = false;
+                        break;
                     }
                 }
             }

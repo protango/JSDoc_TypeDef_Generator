@@ -13,7 +13,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         private List<TypeDef> typeDefinitions = new List<TypeDef>();
         public TypeDef[] TypeDefinitions => typeDefinitions.ToArray();
 
-        public static JSDScope ParseJSONToken(JToken obj, JSONParseOptions? opts = null) {
+        public static JSDScope ParseJSONToken(JToken obj, JSONParseOptions opts = null) {
             JSDScope scope = new JSDScope();
             JSONParseOptions optsval = opts ?? new JSONParseOptions();
             JSDType rootType = scope.ObjSpec(obj, null, optsval);
@@ -53,7 +53,7 @@ namespace JSDoc_TypeDef_Generator.JSDoc
                     current.Properties.Add(prop.Name, jsdt);
                 }
 
-                return SquashType(current, propName).JSDType;
+                return SquashType(current, propName, opts).JSDType;
             } else if (obj is JArray)
                 return ArrSpec((JArray)obj, propName, opts);
             else if (obj is JValue)
@@ -62,24 +62,23 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         }
 
         private JSDType ArrSpec(JArray arr, string propName, JSONParseOptions opts) {
-            var anyArray = JSDType.Any; anyArray.IsArray = true;
-            if (arr.Count == 0) return anyArray;
+            if (arr.Count == 0) return JSDType.AnyArray;
             Type[] ts = arr.Select(x => x.GetType()).ToArray();
             int classCount = ts.Count(x => x.IsClass);
 
             List<JSDType> arrTypes = new List<JSDType>();
-            JToken[] nuArr = opts.MaxArrayAnalysis > 0 ? arr.Take(opts.MaxArrayAnalysis).ToArray() : arr.ToArray();
+            JToken[] nuArr = arr.Take(opts.MaxArrayAnalysis).ToArray();
             foreach (var elem in nuArr) {
                 arrTypes.Add(ObjSpec(elem, new Pluralizer().Singularize(propName), opts));
             }
             string[] rawTypes = arrTypes.Where(x => !x.IsAny).SelectMany(x => x.Types).Distinct().ToArray();
-            if (rawTypes.Length == 0) return anyArray;
+            if (rawTypes.Length == 0) return JSDType.AnyArray;
             return new JSDType(rawTypes) { IsArray = true };
         }
 
-        private TypeDef SquashType(TypeDef t, string propName = null) {
+        private TypeDef SquashType(TypeDef t, string propName, JSONParseOptions opts) {
             foreach (TypeDef td in typeDefinitions) {
-                if (td.Properties.TrySquash(t.Properties)) {
+                if (td.Properties.TrySquash(t.Properties, opts.MaxMultiType)) {
                     return td;
                 }
             }

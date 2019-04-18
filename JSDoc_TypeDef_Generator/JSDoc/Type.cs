@@ -7,10 +7,13 @@ namespace JSDoc_TypeDef_Generator.JSDoc
 {
     class JSDType
     {
+        private const string any = "any";
+
         public string[] Types { get; }
         public NullableStatus Nullable { get; set; }
         public bool IsArray { get; set; }
-        public bool IsAny { get => Types.Length == 1 && Types[0] == "any"; }
+        public bool IsAny { get => Types.Length == 1 && Types[0] == any && !IsArray && Nullable == NullableStatus.Unspecified; }
+        public bool IsAnyArray { get => Types.Length == 1 && Types[0] == any && IsArray && Nullable == NullableStatus.Unspecified; }
 
         public override string ToString() {
             string tt = string.Join("|", Types);
@@ -45,7 +48,8 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         public static JSDType Boolean { get => new JSDType("boolean"); }
         public static JSDType Number { get => new JSDType("number"); }
         public static JSDType String { get => new JSDType("string"); }
-        public static JSDType Any { get => new JSDType("any"); }
+        public static JSDType Any { get => new JSDType(any); }
+        public static JSDType AnyArray { get => new JSDType(any) { IsArray = true }; }
 
         public static JSDType TranslatePrimitive(Type t) {
             if (t == null) return Any;
@@ -60,6 +64,24 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             return Any;
         }
 
+        /// <summary>
+        /// Tries to merge two JSDTypes together.
+        /// </summary>
+        /// <param name="t1">A JSDType to merge</param>
+        /// <param name="t2">A JSDType to merge</param>
+        /// <param name="result">Output parameter for merged JSDType, if merge was not successful this is set to null</param>
+        /// <returns>A boolean value indicating whether the merge was successful or not</returns>
+        public static bool TryMerge(JSDType t1, JSDType t2, out JSDType result) {
+            if (t1.IsArray != t2.IsArray) { result = null; return false; }
+            string[] rTypes = t1.Types.Concat(t2.Types).Distinct().Where(x => x != any).ToArray();
+            result = rTypes.Length > 0 ? new JSDType(rTypes) : Any;
+            result.IsArray = t1.IsArray;
+            if (t1.Nullable == NullableStatus.Unspecified) result.Nullable = t2.Nullable;
+            else if (t2.Nullable == NullableStatus.Unspecified) result.Nullable = t1.Nullable;
+            else if (t1.Nullable == t2.Nullable) result.Nullable = t1.Nullable;
+            else { result = null; return false; }
+            return true;
+        }
 
         public enum NullableStatus {
             Unspecified,

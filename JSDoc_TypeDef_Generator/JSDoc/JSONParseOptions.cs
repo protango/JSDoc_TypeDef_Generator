@@ -1,6 +1,7 @@
 ﻿namespace JSDoc_TypeDef_Generator.JSDoc {
-    public struct JSONParseOptions {
-        public bool DetectFakeArrays { get; set; }
-        public int MaxArrayAnalysis { get; set; }
+    public class JSONParseOptions {
+        public bool DetectFakeArrays { get; set; } = false;
+        public int MaxArrayAnalysis { get; set; } = int.MaxValue;
+        public int MaxMultiType { get; set; } = int.MaxValue;
     }
 }
