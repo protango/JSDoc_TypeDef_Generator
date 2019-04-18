@@ -62,7 +62,8 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         }
 
         private JSDType ArrSpec(JArray arr, string propName, JSONParseOptions opts) {
-            if (arr.Count == 0) return new JSDType() { IsArray = true };
+            var anyArray = JSDType.Any; anyArray.IsArray = true;
+            if (arr.Count == 0) return anyArray;
             Type[] ts = arr.Select(x => x.GetType()).ToArray();
             int classCount = ts.Count(x => x.IsClass);
 
@@ -71,7 +72,9 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             foreach (var elem in nuArr) {
                 arrTypes.Add(ObjSpec(elem, new Pluralizer().Singularize(propName), opts));
             }
-            return new JSDType(arrTypes.SelectMany(x => x.Types).Distinct().ToArray()) { IsArray = true };
+            string[] rawTypes = arrTypes.Where(x => !x.IsAny).SelectMany(x => x.Types).Distinct().ToArray();
+            if (rawTypes.Length == 0) return anyArray;
+            return new JSDType(rawTypes) { IsArray = true };
         }
 
         private TypeDef SquashType(TypeDef t, string propName = null) {
