@@ -72,6 +72,8 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         /// <param name="result">Output parameter for merged JSDType, if merge was not successful this is set to null</param>
         /// <returns>A boolean value indicating whether the merge was successful or not</returns>
         public static bool TryMerge(JSDType t1, JSDType t2, out JSDType result) {
+            if (t1.IsAny) { result = t2; return true; }
+            if (t2.IsAny) { result = t1; return true; }
             if (t1.IsArray != t2.IsArray) { result = null; return false; }
             string[] rTypes = t1.Types.Concat(t2.Types).Distinct().Where(x => x != any).ToArray();
             result = rTypes.Length > 0 ? new JSDType(rTypes) : Any;
