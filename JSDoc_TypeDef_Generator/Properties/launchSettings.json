@@ -2,7 +2,7 @@
   "profiles": {
     "JSDoc_TypeDef_Generator": {
       "commandName": "Project",
-      "commandLineArgs": "--file \"..\\..\\..\\samples\\input.json\" -o \"..\\..\\..\\samples\\output.js\""
+      "commandLineArgs": "--file \"..\\..\\..\\samples\\biginput.json\" -o \"..\\..\\..\\samples\\bigoutput.js\""
     }
   }
 }

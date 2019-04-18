@@ -26,5 +26,5 @@
  * @property {boolean} SiteMove 
  * @property {string} StartTime 
  * @property {boolean} Triples 
- * @property {date} Day 
+ * @property {Date} Day 
  */

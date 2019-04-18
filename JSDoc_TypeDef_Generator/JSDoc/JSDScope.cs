@@ -13,9 +13,10 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         private List<TypeDef> typeDefinitions = new List<TypeDef>();
         public TypeDef[] TypeDefinitions => typeDefinitions.ToArray();
 
-        public static JSDScope ParseJSONToken(JToken obj) {
+        public static JSDScope ParseJSONToken(JToken obj, JSONParseOptions? opts = null) {
             JSDScope scope = new JSDScope();
-            JSDType rootType = scope.ObjSpec(obj);
+            JSONParseOptions optsval = opts ?? new JSONParseOptions();
+            JSDType rootType = scope.ObjSpec(obj, null, optsval);
 
             TypeDef rootTypeDef = scope.typeDefinitions.First(x => x.JSDType.Equals(rootType));
             scope.typeDefinitions.Remove(rootTypeDef);
@@ -31,32 +32,44 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             return result;
         }
 
-        private JSDType ObjSpec(JToken obj, string propName = null) {
+        private JArray FakeArrayConvert(JObject obj) {
+            var props = obj.Properties();
+            if (!props.Any(x => x.Name == "0")) return null;
+            var arrprops = props.Where(x => int.TryParse(x.Name, out _)).OrderBy(x=>x.Name);
+            return new JArray(arrprops.Select(x=>x.Value));
+        }
+
+        private JSDType ObjSpec(JToken obj, string propName, JSONParseOptions opts) {
             if (obj is JObject) {
                 TypeDef current = new TypeDef();
                 JObject jobj = (JObject)obj;
+                if (opts.DetectFakeArrays) {
+                    JArray tryArr = FakeArrayConvert(jobj);
+                    if (tryArr != null) return ArrSpec(tryArr, propName, opts);
+                }
                 var props = jobj.Properties();
                 foreach (var prop in props) {
-                    JSDType jsdt = ObjSpec(prop.Value, prop.Name);
+                    JSDType jsdt = ObjSpec(prop.Value, prop.Name, opts);
                     current.Properties.Add(prop.Name, jsdt);
                 }
 
                 return SquashType(current, propName).JSDType;
             } else if (obj is JArray)
-                return ArrSpec((JArray)obj, propName);
+                return ArrSpec((JArray)obj, propName, opts);
             else if (obj is JValue)
                 return JSDType.TranslatePrimitive(((JValue)obj).Value?.GetType());
             throw new Exception("obj must be either a JObject, JArray, or JValue");
         }
 
-        private JSDType ArrSpec(JArray arr, string propName = null) {
+        private JSDType ArrSpec(JArray arr, string propName, JSONParseOptions opts) {
             if (arr.Count == 0) return new JSDType() { IsArray = true };
             Type[] ts = arr.Select(x => x.GetType()).ToArray();
             int classCount = ts.Count(x => x.IsClass);
 
             List<JSDType> arrTypes = new List<JSDType>();
-            foreach (var elem in arr) {
-                arrTypes.Add(ObjSpec(elem, new Pluralizer().Singularize(propName)));
+            JToken[] nuArr = opts.MaxArrayAnalysis > 0 ? arr.Take(opts.MaxArrayAnalysis).ToArray() : arr.ToArray();
+            foreach (var elem in nuArr) {
+                arrTypes.Add(ObjSpec(elem, new Pluralizer().Singularize(propName), opts));
             }
             return new JSDType(arrTypes.SelectMany(x => x.Types).Distinct().ToArray()) { IsArray = true };
         }
