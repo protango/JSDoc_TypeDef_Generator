@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /JSDoc_TypeDef_Generator/samples/biginput.json
 /JSDoc_TypeDef_Generator/samples/bigoutput.js
+/JSDoc_TypeDef_Generator/samples/optimisedinput.json
