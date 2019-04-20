@@ -1,30 +1,75 @@
 /**
  * Enter Description Here
  * @typedef {Object} MyType
- * @property {string} Code 
- * @property {number} FileID 
- * @property {number} ID 
- * @property {string} Name 
- * @property {number} Number 
- * @property {Period[]} Periods 
+ * @property {string} tabsRoot 
+ * @property {string} packsRoot 
+ * @property {string} emoticonsRoot 
+ * @property {string} itemsRoot 
+ * @property {tab[]} tabs 
+ * @property {pack[]} packs 
+ * @property {item[]} items 
  */
 /**
  * Enter Description Here
- * @typedef {Object} Period
- * @property {string} Code 
- * @property {number} DayID 
- * @property {number} DayNumber 
- * @property {boolean} Doubles 
- * @property {string} EndTime 
- * @property {number} FileID 
- * @property {number} ID 
- * @property {number} Index 
- * @property {number} Load 
- * @property {string} Name 
- * @property {number} Number 
- * @property {boolean} Quadruples 
- * @property {boolean} SiteMove 
- * @property {string} StartTime 
- * @property {boolean} Triples 
- * @property {Date} Day 
+ * @typedef {Object} item
+ * @property {string} id 
+ * @property {string} type 
+ * @property {string[]} shortcuts 
+ * @property {boolean} visible 
+ * @property {boolean} useInSms 
+ * @property {media} media 
+ * @property {string} description 
+ * @property {string[]} keywords 
+ * @property {string} etag 
+ */
+/**
+ * Enter Description Here
+ * @typedef {Object} media
+ * @property {default} default 
+ */
+/**
+ * Enter Description Here
+ * @typedef {Object} default
+ * @property {number} firstFrame 
+ * @property {number} framesCount 
+ * @property {number} framesCountOptimized 
+ * @property {number[]} playBack 
+ * @property {number} fps 
+ */
+/**
+ * Enter Description Here
+ * @typedef {Object} pack
+ * @property {string} id 
+ * @property {string} title 
+ * @property {string} description 
+ * @property {any} copyright 
+ * @property {boolean} isHidden 
+ * @property {boolean} isSponsored 
+ * @property {any} keywords 
+ * @property {string} price 
+ * @property {any} expiry 
+ * @property {string} etag 
+ * @property {string[]} items 
+ */
+/**
+ * Enter Description Here
+ * @typedef {Object} tab
+ * @property {section[]} sections 
+ * @property {string} id 
+ * @property {string} title 
+ * @property {string} description 
+ * @property {string} copyright 
+ * @property {boolean} isHidden 
+ * @property {string} price 
+ * @property {any} expiry 
+ * @property {string} glyphBgColor 
+ * @property {boolean} isDiscoverable 
+ * @property {string} badgeETag 
+ * @property {string[]} keywords 
+ * @property {string} etag 
+ */
+/**
+ * Enter Description Here
+ * @typedef {Object} section
+ * @property {string} pack 
  */
