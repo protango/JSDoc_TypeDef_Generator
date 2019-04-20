@@ -67,9 +67,14 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             int classCount = ts.Count(x => x.IsClass);
 
             List<JSDType> arrTypes = new List<JSDType>();
-            JToken[] nuArr = arr.Take(opts.MaxArrayAnalysis).ToArray();
-            foreach (var elem in nuArr) {
-                arrTypes.Add(ObjSpec(elem, new Pluralizer().Singularize(propName), opts));
+            int processed = 0;
+            foreach (var elem in arr) {
+                var spec = ObjSpec(elem, new Pluralizer().Singularize(propName), opts);
+                if (!spec.IsAny) {
+                    arrTypes.Add(spec);
+                    processed++;
+                    if (processed >= opts.MaxArrayAnalysis) break;
+                }
             }
             string[] rawTypes = arrTypes.Where(x => !x.IsAny).SelectMany(x => x.Types).Distinct().ToArray();
             if (rawTypes.Length == 0) return JSDType.AnyArray;
