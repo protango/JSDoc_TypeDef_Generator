@@ -61,14 +61,14 @@ namespace JSDoc_TypeDef_Generator
                 File.WriteAllText(OutputFilePath, scope.ToString().Replace("\n", "\r\n"));
                 Console.WriteLine($"Successfully wrote JSDoc to \"{OutputFilePath}\"");
                 Console.WriteLine($"Root type is \"{scope.TypeDefinitions.First().Name}\"");
-#if DEBUG
-                Console.ReadLine();
-#endif
             } catch (OptionException e) {
                 Error($"Value for {e.OptionName} was invalid\n{e.Message}");
             } catch (Exception e) {
                 Error(e.Message);
             }
+#if DEBUG
+            Console.ReadLine();
+#endif
         }
 
         private static void Help() {
@@ -79,9 +79,6 @@ namespace JSDoc_TypeDef_Generator
 
             Console.WriteLine("Options:");
             options.WriteOptionDescriptions(Console.Out);
-#if DEBUG
-            Console.ReadLine();
-#endif
             return;
         }
 
@@ -89,9 +86,6 @@ namespace JSDoc_TypeDef_Generator
             Console.Write($"{EXENAME}: ");
             Console.WriteLine(message);
             Console.WriteLine($"Try '{EXENAME} --help' for usage information.");
-#if DEBUG
-            Console.ReadLine();
-#endif
         }
     }
 }
