@@ -7,7 +7,22 @@
  * @property {string} itemsRoot 
  * @property {tab[]} tabs 
  * @property {pack[]} packs 
- * @property {item[]} items 
+ * @property {(item|item_1)[]} items 
+ */
+/**
+ * Enter Description Here
+ * @typedef {Object} item_1
+ * @property {string} type 
+ * @property {string} id 
+ * @property {string} etag 
+ * @property {boolean} isSponsored 
+ * @property {string} description 
+ * @property {string} pickerTitle 
+ * @property {string} auxiliaryText 
+ * @property {string} auxiliaryUrl 
+ * @property {string} transcript 
+ * @property {string[]} keywords 
+ * @property {string} copyright 
  */
 /**
  * Enter Description Here
