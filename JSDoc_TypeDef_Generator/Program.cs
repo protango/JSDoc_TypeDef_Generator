@@ -71,7 +71,7 @@ namespace JSDoc_TypeDef_Generator
                         }
                     }
                 }
-                JSDoc.JSDScope scope = JSDoc.JSDScope.ParseJSONToken(jt, parseOptions);
+                JSDoc.JSDScope scope = JSDoc.JSDScope.GenerateFrom(jt, parseOptions);
                 File.WriteAllText(OutputFilePath, scope.ToString().Replace("\n", "\r\n"));
                 Console.WriteLine($"Successfully wrote JSDoc to \"{OutputFilePath}\"");
                 Console.WriteLine($"Root type is \"{scope.TypeDefinitions.First().Name}\"");

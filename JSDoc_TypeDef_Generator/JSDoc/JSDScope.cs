@@ -5,30 +5,50 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace JSDoc_TypeDef_Generator.JSDoc
 {
     class JSDScope
     {
-        private List<TypeDef> typeDefinitions = new List<TypeDef>();
-        public TypeDef[] TypeDefinitions => typeDefinitions.ToArray();
+        public List<TypeDef> TypeDefinitions { get; set; }
 
-        public static JSDScope ParseJSONToken(JToken obj, JSONParseOptions opts = null) {
+        public JSDScope() {
+            TypeDefinitions = new List<TypeDef>();
+        }
+
+        public static JSDScope Parse(string input) {
+            input = input.Replace("\r\n", "\n"); //Convert to UNIX string
+            Regex rx = new Regex(@"\/\*\*(?:([^@\n]*(?:\s*\*\s*(?!\s*@[a-zA-Z]+)[^\r\n]*)*)\s*\*\s*|\s+)@typedef\s+{([^}]+)}\s+(\w+)(.*?)\*\/", RegexOptions.Singleline | RegexOptions.Compiled);
+            JSDScope result = new JSDScope();
+            MatchCollection matches = rx.Matches(input);
+            foreach (Match match in matches) {
+                string description = match.Captures[0].Value;
+                description = description.Trim();
+                description = new Regex(@"^\s*\*[ \t\f]*").Replace(description, "");
+                description.Replace(" * ", "");
+                description.Replace("*", "");
+                //result.TypeDefinitions.Add()
+            }
+            return null;
+        }
+
+        public static JSDScope GenerateFrom(JToken obj, JSONParseOptions opts = null) {
             JSDScope scope = new JSDScope();
             JSONParseOptions optsval = opts ?? new JSONParseOptions();
             JSDType rootType = scope.ObjSpec(obj, null, optsval);
 
-            TypeDef rootTypeDef = scope.typeDefinitions.First(x => x.JSDType.Equals(rootType));
-            scope.typeDefinitions.Remove(rootTypeDef);
-            scope.typeDefinitions.Add(rootTypeDef);
-            scope.typeDefinitions.Reverse();// move root typedef to the front of list
+            TypeDef rootTypeDef = scope.TypeDefinitions.First(x => x.JSDType.Equals(rootType));
+            scope.TypeDefinitions.Remove(rootTypeDef);
+            scope.TypeDefinitions.Add(rootTypeDef);
+            scope.TypeDefinitions.Reverse();// move root typedef to the front of list
 
             return scope;
         }
 
         public override string ToString() {
             string result = "";
-            foreach (var td in typeDefinitions) result += "/**\n * " + td.ToString().Replace("\n", "\n * ") + "\n */\n";
+            foreach (var td in TypeDefinitions) result += "/**\n * " + td.ToString().Replace("\n", "\n * ") + "\n */\n";
             return result;
         }
 
@@ -82,19 +102,19 @@ namespace JSDoc_TypeDef_Generator.JSDoc
         }
 
         private TypeDef SquashType(TypeDef t, string propName, JSONParseOptions opts) {
-            foreach (TypeDef td in typeDefinitions) {
+            foreach (TypeDef td in TypeDefinitions) {
                 if (td.Properties.TrySquash(t.Properties, opts.MaxMultiType)) {
                     return td;
                 }
             }
             propName = propName ?? "MyType";
-            if (typeDefinitions.Any(x => x.Name == propName)) {
+            if (TypeDefinitions.Any(x => x.Name == propName)) {
                 int i = 1;
-                while (typeDefinitions.Any(x => x.Name == propName + "_" + i)) i++;
+                while (TypeDefinitions.Any(x => x.Name == propName + "_" + i)) i++;
                 propName += "_" + i;
             }
             t.Name = propName;
-            typeDefinitions.Add(t);
+            TypeDefinitions.Add(t);
             return t;
         }
     }
