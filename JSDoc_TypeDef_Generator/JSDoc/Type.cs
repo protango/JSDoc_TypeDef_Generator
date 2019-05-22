@@ -5,8 +5,7 @@ using System.Linq;
 
 namespace JSDoc_TypeDef_Generator.JSDoc
 {
-    class JSDType
-    {
+    class JSDType {
         private const string any = "any";
 
         public string[] Types { get; }
@@ -30,6 +29,17 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             return Types.OrderBy(x => x).SequenceEqual(tobj.Types.OrderBy(x => x)) &&
                    Nullable == tobj.Nullable &&
                    IsArray == tobj.IsArray;
+        }
+
+        public static JSDType Parse(string s) {
+            /*s = s.ToLower();
+            if (s.EndsWith("[]"))
+            if (s == "string") return String;
+            if (s == "number") return Number;
+            if (s == "boolean") return Boolean;
+            if (s == "date") return Date;
+            if (s == "any") return Any;*/
+            return null;
         }
 
         public override int GetHashCode() {

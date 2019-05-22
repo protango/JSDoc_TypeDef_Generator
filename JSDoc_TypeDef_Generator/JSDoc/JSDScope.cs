@@ -23,14 +23,18 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             JSDScope result = new JSDScope();
             MatchCollection matches = rx.Matches(input);
             foreach (Match match in matches) {
-                string description = match.Captures[0].Value;
-                description = description.Trim();
+                string description = match.Captures[0].Value.Trim();
+                string name = match.Captures[2].Value.Trim();
                 description = new Regex(@"^\s*\*[ \t\f]*").Replace(description, "");
-                description.Replace(" * ", "");
-                description.Replace("*", "");
-                //result.TypeDefinitions.Add()
+
+                TypeDef td = new TypeDef(name, description);
+
+                foreach (Match PropMatch in new Regex(@"@property\s+{([^}]+)}\s+([^\s]+)$").Matches(match.Captures[3].Value)) {
+                    td.Properties.Add(PropMatch.Captures[1].Value.Trim(), JSDType.Parse(PropMatch.Captures[0].Value));
+                }
+                result.TypeDefinitions.Add(td);
             }
-            return null;
+            return result;
         }
 
         public static JSDScope GenerateFrom(JToken obj, JSONParseOptions opts = null) {
