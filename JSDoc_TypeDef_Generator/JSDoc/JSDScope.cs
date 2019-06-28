@@ -23,14 +23,14 @@ namespace JSDoc_TypeDef_Generator.JSDoc
             JSDScope result = new JSDScope();
             MatchCollection matches = rx.Matches(input);
             foreach (Match match in matches) {
-                string description = match.Captures[0].Value.Trim();
-                string name = match.Captures[2].Value.Trim();
+                string description = match.Groups[1].Value.Trim();
+                string name = match.Groups[3].Value.Trim();
                 description = new Regex(@"^\s*\*[ \t\f]*").Replace(description, "");
 
                 TypeDef td = new TypeDef(name, description);
 
-                foreach (Match PropMatch in new Regex(@"@property\s+{([^}]+)}\s+([^\s]+)$").Matches(match.Captures[3].Value)) {
-                    td.Properties.Add(PropMatch.Captures[1].Value.Trim(), JSDType.Parse(PropMatch.Captures[0].Value));
+                foreach (Match PropMatch in new Regex(@"@property\s+{([^}]+)}\s+([^\s]+)\s*$").Matches(match.Groups[4].Value)) {
+                    td.Properties.Add(PropMatch.Groups[2].Value.Trim(), JSDType.Parse(PropMatch.Groups[1].Value));
                 }
                 result.TypeDefinitions.Add(td);
             }

@@ -59,6 +59,14 @@ namespace JSDoc_TypeDef_Generator
                 if (OutputFilePath == null && SchemaFilePath == null) throw new OptionException("Either an output or schema file must be specified", "--output");
                 if (OutputFilePath != null && SchemaFilePath != null) throw new OptionException("You cannot specify an output and schema file at the same time", "--output");
 
+                if (SchemaFilePath != null)
+                {
+                    using (StreamReader file = File.OpenText(SchemaFilePath))
+                    {
+                        JSDoc.JSDScope scopel = JSDoc.JSDScope.Parse(file.ReadToEnd());
+                    }
+                }
+
                 JToken jt;
                 using (StreamReader file = File.OpenText(JSONFilePath)) {
                     using (JsonTextReader jsr = new JsonTextReader(file)) {
@@ -80,9 +88,6 @@ namespace JSDoc_TypeDef_Generator
             } catch (Exception e) {
                 Error(e.Message);
             }
-#if DEBUG
-            Console.ReadLine();
-#endif
         }
 
         private static void Help() {
@@ -93,18 +98,12 @@ namespace JSDoc_TypeDef_Generator
 
             Console.WriteLine("Options:");
             options.WriteOptionDescriptions(Console.Out);
-#if DEBUG
-            Console.ReadLine();
-#endif
         }
 
         private static void Error(string message) {
             Console.Write($"{EXENAME}: ");
             Console.WriteLine(message);
             Console.WriteLine($"Try '{EXENAME} --help' for usage information.");
-#if DEBUG
-            Console.ReadLine();
-#endif
         }
     }
 }
