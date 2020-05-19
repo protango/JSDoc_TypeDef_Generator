@@ -16,12 +16,16 @@ namespace JSDoc_TypeDef_Generator
         static void Main(string[] args)
         {
             try {
+                string JSONInput = null;
                 string JSONFilePath = null;
                 string OutputFilePath = null;
                 string SchemaFilePath = null;
                 bool shouldShowHelp = false;
                 var parseOptions = new JSDoc.JSONParseOptions();
                 options = new OptionSet {
+                    { "j|json=", "Inline JSON input", f => {
+                        JSONInput =f;
+                    } },
                     { "f|file=", "Path to a file containing a JSON object", f => {
                         if (!File.Exists(f)) throw new OptionException($"File \"{f}\" not found or inaccessible","--file");
                         JSONFilePath =f;
@@ -55,25 +59,40 @@ namespace JSDoc_TypeDef_Generator
                     Help();
                     return;
                 }
-                if (JSONFilePath == null) throw new OptionException("JSON File must be specified", "--file");
-                if (OutputFilePath == null && SchemaFilePath == null) throw new OptionException("Either an output or schema file must be specified", "--output");
+                if (JSONFilePath == null && JSONInput == null) throw new OptionException("Must specify an input using either the --json or --file flag", "--json");
+                if (JSONFilePath != null && JSONInput != null) throw new OptionException("You cannot specify an inline input and input file at the same time", "--json");
                 if (OutputFilePath != null && SchemaFilePath != null) throw new OptionException("You cannot specify an output and schema file at the same time", "--output");
+                bool outputInline = OutputFilePath == null && SchemaFilePath == null;
 
                 JToken jt;
-                using (StreamReader file = File.OpenText(JSONFilePath)) {
-                    using (JsonTextReader jsr = new JsonTextReader(file)) {
+                using (TextReader textReader = JSONFilePath != null ? File.OpenText(JSONFilePath) : (TextReader)new StringReader(JSONInput))
+                {
+                    using (JsonTextReader jsr = new JsonTextReader(textReader))
+                    {
                         JsonSerializer serializer = new JsonSerializer();
-                        try {
+                        try
+                        {
                             jt = (JToken)serializer.Deserialize(jsr);
-                        } catch (JsonException e) {
+                        }
+                        catch (JsonException e)
+                        {
                             Error("Invalid JSON in input file");
                             return;
                         }
                     }
                 }
+
                 JSDoc.JSDScope scope = JSDoc.JSDScope.GenerateFrom(jt, parseOptions);
-                File.WriteAllText(OutputFilePath, scope.ToString().Replace("\n", "\r\n"));
-                Console.WriteLine($"Successfully wrote JSDoc to \"{OutputFilePath}\"");
+                if (outputInline)
+                {
+                    Console.WriteLine(scope.ToString().Replace("\n", "\r\n"));
+                }
+                else 
+                {
+                    File.WriteAllText(OutputFilePath, scope.ToString().Replace("\n", "\r\n"));
+                    Console.WriteLine($"Successfully wrote JSDoc to \"{OutputFilePath}\"");
+                }
+                
                 Console.WriteLine($"Root type is \"{scope.TypeDefinitions.First().Name}\"");
             } catch (OptionException e) {
                 Error($"Value for {e.OptionName} was invalid\n{e.Message}");
@@ -86,7 +105,7 @@ namespace JSDoc_TypeDef_Generator
         }
 
         private static void Help() {
-            Console.WriteLine($"Usage: {EXENAME} -f <Input File> (-o <Output File>|-s <Schema File>) [OTHER OPTIONS]");
+            Console.WriteLine($"Usage: {EXENAME} (-i <Inline JSON>|-f <Input File>) [-o <Output File>|-s <Schema File>] [OTHER OPTIONS]");
             Console.WriteLine("Generates JSDoc typedefs based on a JSON object");
             Console.WriteLine("Nested objects are supported, in this case multiple typedefs will be produced");
             Console.WriteLine();
